@@ -12,11 +12,11 @@ using VampireSurvivors.Graphics;
 using VampireSurvivors.Interfaces;
 using VampireSurvivors.Objects.Pickups;
 using VampireSurvivors.Objects.Pools;
-using VampireSurvivors.Objects.Weapons;
+using VampireSurvivorsDecompProject.Objects.Weapons;
 
 // Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
 
-namespace VampireSurvivors.Objects.Projectiles
+namespace VampireSurvivorsDecompProject.Objects.Projectiles
 {
 	public class Projectile : ArcadeSprite, IDamageable // TypeDefIndex: 15940
 	{
@@ -78,7 +78,27 @@ namespace VampireSurvivors.Objects.Projectiles
 				_pauseWallChecksTimer -= PauseSystem.DeltaTime;
 			}
 		} // 0x0000000186D95110-0x0000000186D95160
-		public virtual void InitProjectile(BulletPool pool, Weapon weapon, int index) {} // 0x0000000186E568B0-0x0000000186E56CF0
+		public virtual void InitProjectile(BulletPool pool, Weapon weapon, int index) 
+		{
+			_gameSessionData = GM.Core.GameSessionData;
+			_pool = pool;
+			_weapon = weapon;
+			_indexInWeapon = index;
+			if (_objectsHit.Count >0)
+				_objectsHit.Clear();
+			_bounces = weapon.PBounces();
+			if (body == null)
+				ArcadePhysics.scene.physics.world.enableBody(this);
+
+			PhysicsManager.Instance._bulletGroup.add(this._sprite);
+			if (_spriteTrail)
+				_spriteTrail.Reset();
+
+			if (!weapon.SpawnedProjectiles.Contains(this))
+				weapon.SpawnedProjectiles.Add(this);
+
+			GM.Core.ParticleManager.RegisterParticleSystem(this.GetComponentInChildren<ParticleSystem>());
+		} // 0x0000000186E568B0-0x0000000186E56CF0
 		public virtual void SetNullTarget() {} // 0x0000000186E56CF0-0x0000000186E56D50
 		public virtual void SetTarget(Transform target) {} // 0x0000000181917690-0x00000001819176F0
 		public void SetVelocity(Vector2 velocity) {} // 0x0000000186E56D50-0x0000000186E56D90
