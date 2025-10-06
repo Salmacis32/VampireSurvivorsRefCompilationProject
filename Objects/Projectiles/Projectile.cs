@@ -99,9 +99,18 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
 
 			GM.Core.ParticleManager.RegisterParticleSystem(this.GetComponentInChildren<ParticleSystem>());
 		} // 0x0000000186E568B0-0x0000000186E56CF0
-		public virtual void SetNullTarget() {} // 0x0000000186E56CF0-0x0000000186E56D50
-		public virtual void SetTarget(Transform target) {} // 0x0000000181917690-0x00000001819176F0
-		public void SetVelocity(Vector2 velocity) {} // 0x0000000186E56D50-0x0000000186E56D90
+		public virtual void SetNullTarget() 
+		{
+			_targetTransform = null;
+		} // 0x0000000186E56CF0-0x0000000186E56D50
+		public virtual void SetTarget(Transform target) 
+		{
+			_targetTransform = target;
+		} // 0x0000000181917690-0x00000001819176F0
+		public void SetVelocity(Vector2 velocity) 
+		{
+			_sprite.body._velocity = velocity;
+		} // 0x0000000186E56D50-0x0000000186E56D90
 		public virtual void InternalUpdate() {} // 0x0000000180B15170-0x0000000180B15180
 		public bool HasAlreadyHitPickUpObject(IDamageable damageable) => default; // 0x0000000186E56D90-0x0000000186E56E40
 		public bool HasAlreadyHitObject(IDamageable damageable) => default; // 0x0000000186E56E40-0x0000000186E56F00
