@@ -1,0 +1,21 @@
+﻿/*
+ * Generated code file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
+ */
+
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+// Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
+
+namespace VampireSurvivors.Objects.Weapons
+{
+	public class AccessoryC1_SHRINK_CREWMA : ActiveAccessory // TypeDefIndex: 16103
+	{
+		// Constructors
+		public AccessoryC1_SHRINK_CREWMA() {} // 0x0000000186EED900-0x0000000186EED910
+	
+		// Methods
+		public override void AfterWeaponAdded() {} // 0x0000000186EED8C0-0x0000000186EED900
+	}
+}

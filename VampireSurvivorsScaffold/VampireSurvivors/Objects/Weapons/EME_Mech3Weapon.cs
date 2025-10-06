@@ -1,0 +1,27 @@
+﻿/*
+ * Generated code file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
+ */
+
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using VampireSurvivors.Data;
+using VampireSurvivors.Objects.Characters;
+
+// Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
+
+namespace VampireSurvivors.Objects.Weapons
+{
+	public class EME_Mech3Weapon : EME_Mech2Weapon // TypeDefIndex: 16604
+	{
+		// Properties
+		protected override int GlimmerTier { get => default; } // 0x0000000181BA4B30-0x0000000181BA4B40 
+		protected override int ComboIndexFinal { get => default; } // 0x0000000187013F90-0x0000000187013FB0 
+	
+		// Constructors
+		public EME_Mech3Weapon() {} // 0x0000000187009980-0x0000000187009990
+	
+		// Methods
+		public override void InitWeapon(CharacterController characterController, WeaponType weaponType) {} // 0x000000018701DB30-0x000000018701DB80
+	}
+}

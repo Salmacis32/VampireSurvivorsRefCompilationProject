@@ -1,0 +1,48 @@
+﻿/*
+ * Generated code file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Unity.Mathematics;
+using UnityEngine;
+using VampireSurvivors.Framework.PhaserTweens;
+using VampireSurvivors.Objects.Pools;
+using VampireSurvivors.Objects.Weapons;
+
+// Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
+
+namespace VampireSurvivors.Objects.Projectiles
+{
+	public class TP_HolyWhip1_Projectile : TP_WhipCore_Projectile // TypeDefIndex: 15587
+	{
+		// Fields
+		[NonSerialized]
+		public float LineAlpha; // 0x118
+		private MultiTargetTween _lineTween; // 0x120
+		[NonSerialized]
+		public float LerpRatio; // 0x128
+		private MultiTargetTween _lerpTween; // 0x130
+		private List<Vector2> _waypointListDefault; // 0x138
+		private List<Vector2> _waypointList; // 0x140
+		private bool _targetEnemy; // 0x148
+		private int _attackCount; // 0x14C
+		private int _attackAmount; // 0x150
+	
+		// Constructors
+		public TP_HolyWhip1_Projectile() {} // 0x0000000186CC84A0-0x0000000186CC8960
+	
+		// Methods
+		public override void InitProjectile(BulletPool pool, Weapon weapon, int index) {} // 0x0000000186CC6650-0x0000000186CC66B0
+		protected override Projectile CreateNodeProjectile(float2 pos) => default; // 0x0000000186CC66B0-0x0000000186CC6770
+		private void startAttack(float delay) {} // 0x0000000186CC6770-0x0000000186CC6BA0
+		private void OnWhipStart() {} // 0x0000000186CC6BA0-0x0000000186CC7460
+		private void OnWhipComplete() {} // 0x0000000186CC7460-0x0000000186CC7940
+		public override void InternalUpdate() {} // 0x0000000186CC7940-0x0000000186CC8160
+		private void ApplyManualNodeControl() {} // 0x0000000186CC8160-0x0000000186CC8400
+		protected override float CalculateIndexNodeDistance(int index) => default; // 0x0000000186CC8400-0x0000000186CC8450
+		public override void Despawn() {} // 0x0000000186CC8450-0x0000000186CC84A0
+	}
+}

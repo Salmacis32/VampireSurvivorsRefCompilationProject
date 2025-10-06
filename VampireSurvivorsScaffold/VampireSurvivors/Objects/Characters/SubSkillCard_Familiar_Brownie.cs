@@ -1,0 +1,26 @@
+﻿/*
+ * Generated code file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
+ */
+
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using VampireSurvivors.Data;
+
+// Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
+
+namespace VampireSurvivors.Objects.Characters
+{
+	public class SubSkillCard_Familiar_Brownie : CharacterSkillCard_Base // TypeDefIndex: 16872
+	{
+		// Fields
+		public VampireSurvivors.Data.CharacterType followerType; // 0x70
+	
+		// Constructors
+		public SubSkillCard_Familiar_Brownie() {} // Dummy constructor
+		public SubSkillCard_Familiar_Brownie(ArcanaType type) {} // 0x00000001870E5360-0x00000001870E5370
+	
+		// Methods
+		public override void InitialActivate() {} // 0x00000001870E5370-0x00000001870E55E0
+	}
+}

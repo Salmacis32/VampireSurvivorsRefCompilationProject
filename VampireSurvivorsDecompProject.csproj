@@ -18,9 +18,9 @@
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\Unity.RenderPipelines.Universal.Runtime\Unity.RenderPipelines.Universal.Runtime.csproj" />
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\Unity.ResourceManager\Unity.ResourceManager.csproj" />
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\Unity.TextMeshPro\Unity.TextMeshPro.csproj" />
-    <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\VampireSurvivors.Runtime\VampireSurvivors.Runtime.csproj" />
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\Zenject-usage\Zenject-usage.csproj" />
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\Zenject\Zenject.csproj" />
+    <ProjectReference Include="VampireSurvivorsScaffold\VampireSurvivorsScaffold.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,24 @@
+﻿/*
+ * Generated code file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
+ */
+
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using VampireSurvivors;
+
+// Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
+
+namespace VampireSurvivors.UI
+{
+	public class GameStateGameOverino : GameStateMachineState // TypeDefIndex: 14561
+	{
+		// Constructors
+		public GameStateGameOverino() {} // 0x0000000180B18150-0x0000000180B181A0
+	
+		// Methods
+		public override void OnEnter() {} // 0x00000001871B2130-0x00000001871B2200
+		public override void OnExit() {} // 0x00000001871B2200-0x00000001871B22D0
+		private void ReturnToGame() {} // 0x00000001871B22D0-0x00000001871B2340
+	}
+}
