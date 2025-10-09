@@ -16,6 +16,8 @@ using VampireSurvivorsDecompProject.Objects.Weapons;
 using System.Collections;
 using Unity.Mathematics;
 using PartyCSharpSDK;
+using VampireSurvivors.Objects.Characters;
+using Coherence.Core;
 
 namespace VampireSurvivorsDecompProject.Objects.Projectiles
 {
@@ -219,13 +221,57 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
 			Velocity = vel;
 			return vel;
 		}// 0x0000000186E57E90-0x0000000186E57F20
-		public bool TryFreeze(IDamageable target) => default; // 0x0000000186E57F20-0x0000000186E58310
-		public bool TryDefang(IDamageable target) => default; // 0x0000000186E58310-0x0000000186E585C0
+		public bool TryFreeze(IDamageable target)
+		{
+			var chance = _weapon.GetChanceFromArray();
+			var luck = _weapon.Owner.PLuck();
+			var freezeChance = luck * _weapon.FreezeChance;
+			if (freezeChance > chance)
+			{
+				var enemyCont = target.GetGameObject()?.GetComponent<EnemyController>();
+				if (enemyCont != null)
+				{
+					var duration = _weapon.PDuration();
+					if (!enemyCont.Freeze(duration, _weapon.FreezeChance))
+						return false;
+				}
+
+				if (!_weapon.HasActiveArcanaOfType(ArcanaType.T12_OUT_OF_TIME))
+					return false;
+
+				var arcanaMan = _weapon.GameMan.ArcanaManager;
+				if (enemyCont != null)
+				{
+					arcanaMan.TriggerColdExplosion(enemyCont.transform.position);
+					return true;
+				}
+			}
+			return false;
+		}// 0x0000000186E57F20-0x0000000186E58310
+		public bool TryDefang(IDamageable target)
+		{
+			var chance = _weapon.GetChanceFromArray();
+			var defang = _weapon.DefangChance;
+			var owner = _weapon.Owner;
+			var defanged = (owner.PLuck() * defang) > chance;
+			if (!defanged)
+				return false;
+
+			var controller = target.GetGameObject()?.GetComponent<EnemyController>();
+			if (controller != null)
+			{
+				return controller.DoDefang();
+			}
+			return false;
+		}// 0x0000000186E58310-0x0000000186E585C0
 		protected virtual void OnHasHitAnObject(IDamageable other) {} // 0x0000000180B15170-0x0000000180B15180
 		protected virtual void OnHasHitAnotherPlayerObject(IDamageable other) {} // 0x0000000180B15170-0x0000000180B15180
-		public float AngleFromVelocity(Vector2 velocity) => default; // 0x0000000186E585C0-0x0000000186E585F0
-		protected float AngleFromVelocityRadians(Vector2 velocity) => default; // 0x0000000186E585F0-0x0000000186E58610
-		protected Transform SetForNearestEnemy(ref Vector2 v) => default; // 0x0000000186E58610-0x0000000186E58A30
+        public float AngleFromVelocity(Vector2 velocity) => Mathf.Atan2(velocity.x, velocity.y) * Mathf.Rad2Deg;// 0x0000000186E585C0-0x0000000186E585F0
+        protected float AngleFromVelocityRadians(Vector2 velocity) => Mathf.Atan2(velocity.x, velocity.y); // 0x0000000186E585F0-0x0000000186E58610
+		protected Transform SetForNearestEnemy(ref Vector2 v)
+		{
+			GM.Core.Stage.FindClosestEnemy();
+		}// 0x0000000186E58610-0x0000000186E58A30
 		public virtual Transform AimForNearestEnemyToPlayer(bool rotate = true /* Metadata: 0x0197797B */) => default; // 0x0000000186E58A30-0x0000000186E58C20
 		public virtual Transform AimForNearestEnemy(bool rotate = true /* Metadata: 0x0197797C */) => default; // 0x0000000186E58C20-0x0000000186E58EF0
 		public virtual Transform AimForNearestEnemyFrom(Transform targetT, bool rotate = true /* Metadata: 0x0197797D */, Vector3? customFromPosition = default) => default; // 0x0000000186E58EF0-0x0000000186E591C0
