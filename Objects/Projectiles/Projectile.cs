@@ -11,10 +11,11 @@ using VampireSurvivors.Framework.Geom;
 using VampireSurvivors.Graphics;
 using VampireSurvivors.Interfaces;
 using VampireSurvivors.Objects.Pickups;
-using VampireSurvivors.Objects.Pools;
+using VampireSurvivorsDecompProject.Objects.Pools;
 using VampireSurvivorsDecompProject.Objects.Weapons;
-
-// Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
+using System.Collections;
+using Unity.Mathematics;
+using PartyCSharpSDK;
 
 namespace VampireSurvivorsDecompProject.Objects.Projectiles
 {
@@ -45,11 +46,11 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
 		private static readonly ProfilerMarker _markerInitProjectile; // 0x00
 	
 		// Properties
-		public HashSet<IDamageable> ObjectsHit { get => default; } // 0x00000001827666D0-0x00000001827666E0 
+		public HashSet<IDamageable> ObjectsHit { get => _objectsHit; } // 0x00000001827666D0-0x00000001827666E0 
 		public virtual float ProjectileSpeed { get => Weapon.PSpeed() * GameManager.ProjectileSpeed * _speed; } // 0x0000000186E56590-0x0000000186E56630 
 		public int IndexInWeapon { get => default; } // 0x00000001819A0220-0x00000001819A0230 
 		public Weapon Weapon { get => default; } // 0x00000001819A0210-0x00000001819A0220 
-		protected Vector2 Velocity { get => default; private set {} } // 0x0000000186E56630-0x0000000186E56660 0x0000000184C486A0-0x0000000184C486E0
+		protected Vector2 Velocity { get => _sprite.body._velocity; private set { _sprite.body._velocity = value; } } // 0x0000000186E56630-0x0000000186E56660 0x0000000184C486A0-0x0000000184C486E0
 	
 		// Constructors
 		public Projectile() 
@@ -112,20 +113,112 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
 			_sprite.body._velocity = velocity;
 		} // 0x0000000186E56D50-0x0000000186E56D90
 		public virtual void InternalUpdate() {} // 0x0000000180B15170-0x0000000180B15180
-		public bool HasAlreadyHitPickUpObject(IDamageable damageable) => default; // 0x0000000186E56D90-0x0000000186E56E40
-		public bool HasAlreadyHitObject(IDamageable damageable) => default; // 0x0000000186E56E40-0x0000000186E56F00
-		public bool HasAlreadyHitPlayerObject(IDamageable damageable) => default; // 0x0000000186E56F00-0x0000000186E56FC0
-		public void AddObjectHit(IDamageable obj) {} // 0x0000000186E56FC0-0x0000000186E57030
-		public float AngleFromTargetRadians(Transform target, Transform playerTransform) => default; // 0x0000000186E57030-0x0000000186E572A0
-		public void ApplyPlayerFacingVelocity(Vector3 playerDirection, bool rotate = true /* Metadata: 0x01977975 */) {} // 0x0000000186E572A0-0x0000000186E57560
-		public void ApplyInversePlayerFacingVelocity(Vector3 playerDirection, bool rotate = true /* Metadata: 0x01977976 */) {} // 0x0000000186E57560-0x0000000186E57840
+		public bool HasAlreadyHitPickUpObject(IDamageable damageable)
+        {
+            return HasAlreadyHitObject(damageable);
+        }// 0x0000000186E56D90-0x0000000186E56E40
+
+		public bool HasAlreadyHitObject(IDamageable damageable)
+		{
+			if (ObjectHitCheck(damageable)) return true;
+
+			OnHasHitAnObject(damageable);
+
+			return false;
+		}// 0x0000000186E56E40-0x0000000186E56F00
+		public bool HasAlreadyHitPlayerObject(IDamageable damageable) 
+		{
+            if (ObjectHitCheck(damageable)) return true;
+
+            OnHasHitAnotherPlayerObject(damageable);
+
+            return false;
+        } // 0x0000000186E56F00-0x0000000186E56FC0
+		public void AddObjectHit(IDamageable obj) 
+		{
+            _objectsHit.Add(obj);
+        } // 0x0000000186E56FC0-0x0000000186E57030
+		public float AngleFromTargetRadians(Transform target, Transform playerTransform)
+		{
+			if (target == null) target = PickRandomEnemy();
+
+			return Mathf.Atan2(target.position.y - playerTransform.position.y, target.position.x - playerTransform.position.x);
+		}// 0x0000000186E57030-0x0000000186E572A0
+		public void ApplyPlayerFacingVelocity(Vector3 playerDirection, bool rotate = true /* Metadata: 0x01977975 */) 
+		{
+			var normal = playerDirection.normalized;
+			if (normal.x == 0.0f && normal.y == 0.0f)
+				normal.x = 1.0f;
+			Velocity = new float2(ProjectileSpeed * normal.x, ProjectileSpeed * normal.y);
+
+			if (rotate)
+			{
+				var angle = Mathf.Atan2(normal.y, normal.x);
+				transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+			}
+		} // 0x0000000186E572A0-0x0000000186E57560
+		public void ApplyInversePlayerFacingVelocity(Vector3 playerDirection, bool rotate = true /* Metadata: 0x01977976 */) 
+		{
+            var normal = playerDirection.normalized;
+            if (normal.x == 0.0f && normal.y == 0.0f)
+                normal.x = 1.0f;
+            Velocity = new float2(ProjectileSpeed * -normal.x, ProjectileSpeed * -normal.y);
+
+            if (rotate)
+            {
+                var angle = Mathf.Atan2(normal.y, normal.x);
+                transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+        } // 0x0000000186E57560-0x0000000186E57840
 		public virtual void OnHasHitWallPhaser(PhaserTile tile) {} // 0x0000000186BB8730-0x0000000186BB8750
 		public virtual bool CanExplode() => default; // 0x0000000180B15290-0x0000000180B152A0
 		public virtual void Explode(Vector2? position = default) {} // 0x0000000180B15170-0x0000000180B15180
-		private void CheckIfVisibleOnScreen() {} // 0x0000000186E57840-0x0000000186E57AC0
-		public virtual void Despawn() {} // 0x0000000186E57AC0-0x0000000186E57D40
-		protected void SetScaleToArea(float multiplier = 1f /* Metadata: 0x01977977 */) {} // 0x0000000186E57D40-0x0000000186E57E90
-		protected Vector2 SetVelocityFromRotation(float rotation, float speed) => default; // 0x0000000186E57E90-0x0000000186E57F20
+		private void CheckIfVisibleOnScreen() 
+		{
+			if (_mainCamera == null) throw new NullReferenceException();
+			var camPos = _mainCamera.transform.position;
+			var ortho = _mainCamera.orthographicSize;
+			var aspect = _mainCamera.aspect;
+			var view = (aspect * ortho);
+
+            var yMinusOrtho = camPos.y - ortho;
+			var xMinusAspectTimesOrtho = camPos.x - view;
+			var aspectTimesOrthoTimes2 = view * 2;
+
+            if (transform.position.x < xMinusAspectTimesOrtho
+				|| aspectTimesOrthoTimes2 <= transform.position.x
+				|| transform.position.y < yMinusOrtho
+				|| yMinusOrtho + (ortho * 2) <= transform.position.y)
+			{
+				Despawn();
+			}
+		} // 0x0000000186E57840-0x0000000186E57AC0
+		public virtual void Despawn()
+		{
+			PhysicsManager.Instance._bulletGroup.remove(this._sprite);
+
+			body._enable = false;
+
+			if (Weapon.SpawnedProjectiles?.Contains(this) ?? false)
+			{
+				Weapon.SpawnedProjectiles.Remove(this);
+			}
+
+			_pool.Return(this);
+		} // 0x0000000186E57AC0-0x0000000186E57D40
+		protected void SetScaleToArea(float multiplier = 1f /* Metadata: 0x01977977 */) 
+		{
+			var one = Vector3.one;
+			var area = _weapon.PArea();
+            _cachedTransform.localScale = new Vector3((one.x * area) * multiplier, (one.y * area) * multiplier, (one.z * area) * multiplier);
+		} // 0x0000000186E57D40-0x0000000186E57E90
+		protected Vector2 SetVelocityFromRotation(float rotation, float speed)
+		{
+			var vel = this.Velocity.ToFloat2();
+			ArcadePhysics.Instance.velocityFromRotation(rotation, speed, ref vel);
+			Velocity = vel;
+			return vel;
+		}// 0x0000000186E57E90-0x0000000186E57F20
 		public bool TryFreeze(IDamageable target) => default; // 0x0000000186E57F20-0x0000000186E58310
 		public bool TryDefang(IDamageable target) => default; // 0x0000000186E58310-0x0000000186E585C0
 		protected virtual void OnHasHitAnObject(IDamageable other) {} // 0x0000000180B15170-0x0000000180B15180
@@ -151,6 +244,20 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
 		public GameObject GetGameObject() => default; // 0x0000000182774DD0-0x0000000182774DE0
 		public void GiveReward(Action<Pickup> onRewardGiven = null) {} // 0x0000000180B15170-0x0000000180B15180
 		public float AlphaFromScale(float weaponArea, float maxScale, float minAlpha) => default; // 0x0000000186E5A460-0x0000000186E5A4C0
+
+        private bool ObjectHitCheck(IDamageable damageable)
+        {
+            if (_objectsHit.Contains(damageable)) return true;
+
+            AddObjectHit(damageable);
+
+            return false;
+        }
+
+		private Transform PickRandomEnemy()
+		{
+			return _weapon.GameMan.Stage.PickRandomEnemy(_weapon.Owner.RandomEnemyPickerGenerator);
+		}
 
         #region Decompiled Psuedocode Reference
         /*

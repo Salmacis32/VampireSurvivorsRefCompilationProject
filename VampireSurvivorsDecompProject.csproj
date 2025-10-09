@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\decomp\com.unity.mathematics-1.3.2\package\Unity.Mathematics.csproj" />
+    <ProjectReference Include="..\dotween\_DOTween.Assembly\DOTween\DOTween.csproj" />
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\PauseSystem\PauseSystem.csproj" />
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\Unity.Addressables\Unity.Addressables.csproj" />
     <ProjectReference Include="..\Il2CppInspectorRedux2\Il2CppInspector.CLI\bin\Debug\net9.0\win-x64\betascaff\Unity.Collections\Unity.Collections.csproj" />
