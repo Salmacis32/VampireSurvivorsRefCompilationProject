@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Coherence.Core;
 using Newtonsoft.Json.Linq;
 using Unity.Mathematics;
 using Unity.Profiling;
@@ -18,7 +19,7 @@ using VampireSurvivors.Framework.TimerSystem;
 using VampireSurvivors.Interfaces;
 using VampireSurvivors.Objects;
 using VampireSurvivors.Objects.Characters;
-using VampireSurvivors.Objects.Pools;
+using VampireSurvivorsDecompProject.Objects.Pools;
 using VampireSurvivorsDecompProject.Objects.Projectiles;
 
 // Image 2: VampireSurvivors.Runtime.dll - Assembly: VampireSurvivors.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null - Types 13826-18866
@@ -121,9 +122,31 @@ namespace VampireSurvivorsDecompProject.Objects.Weapons
 		public override bool IsPowerup() => default; // 0x0000000180B15290-0x0000000180B152A0
 		public virtual float StatsGetDps() => default; // 0x00000001870CAEF0-0x00000001870CAF30
 		protected override void FakeConstruct() {} // 0x00000001870CB1E0-0x00000001870CB560
-		protected virtual new void Awake() {} // 0x00000001870CB560-0x00000001870CB710
+		protected virtual new void Awake() 
+		{
+			_cachedTransform = transform;
+			LimitBreakLevel = 0;
+			_wallsColliders = new List<Collider>();
+			accumulatedLimitBreaks = new LimitBreakData();
+		}
 		protected override void OnDestroy() {} // 0x00000001870CB710-0x00000001870CB840
-		public virtual void InitWeapon(VampireSurvivors.Objects.Characters.CharacterController characterController, WeaponType weaponType) {} // 0x00000001870CB840-0x00000001870CBA50
+		public virtual void InitWeapon(VampireSurvivors.Objects.Characters.CharacterController characterController, WeaponType weaponType)
+		{
+			FakeConstruct();
+			Owner = characterController;
+			Type = weaponType;
+			StatsInflictedDamage = 0;
+			TotalTime = 0;
+			_beginningAmount = 0;
+			if (_projectilePool == null)
+			{
+				_projectilePool = new BulletPool(projectilePrefab: _ProjectilePrefab, ProjectilePoolSize);
+			}
+			_isVisible = true;
+			MakeLevelOne();
+			OnStart();
+			GM.Core.ParticleManager.RegisterParticleSystem(this.GetComponentInChildren<ParticleSystem>());
+		}
 		public virtual void OnMirrorData(Vector2 position) {} // 0x0000000180B15170-0x0000000180B15180
 		public virtual void OnWeaponAdded() {} // 0x0000000180B15170-0x0000000180B15180
 		public virtual float CalculateTotalDamage() => default; // 0x0000000186560970-0x0000000186560980
