@@ -260,7 +260,7 @@ namespace VampireSurvivorsDecompProject.Objects
 			var range = (Math.Pow(maxRange, 2) >= 3.4028235E+38f) ? 3.4028235E+38f : maxRange;
 			if (excludeDead)
 			{
-				while (_spawnedEnemies.i)
+				
 			}
         }
 		public EnemyController FindClosestLateralEnemy(Vector3 queryPos, bool excludeDead = false /* Metadata: 0x0197734C */, float maxRange = 3.4028235E+38f /* Metadata: 0x0197734D */, bool checkLeft = true /* Metadata: 0x01977351 */) => default; // 0x0000000186A1C630-0x0000000186A1CB50

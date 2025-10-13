@@ -270,15 +270,89 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
         protected float AngleFromVelocityRadians(Vector2 velocity) => Mathf.Atan2(velocity.x, velocity.y); // 0x0000000186E585F0-0x0000000186E58610
 		protected Transform SetForNearestEnemy(ref Vector2 v)
 		{
-			GM.Core.Stage.FindClosestEnemy();
-		}// 0x0000000186E58610-0x0000000186E58A30
-		public virtual Transform AimForNearestEnemyToPlayer(bool rotate = true /* Metadata: 0x0197797B */) => default; // 0x0000000186E58A30-0x0000000186E58C20
-		public virtual Transform AimForNearestEnemy(bool rotate = true /* Metadata: 0x0197797C */) => default; // 0x0000000186E58C20-0x0000000186E58EF0
-		public virtual Transform AimForNearestEnemyFrom(Transform targetT, bool rotate = true /* Metadata: 0x0197797D */, Vector3? customFromPosition = default) => default; // 0x0000000186E58EF0-0x0000000186E591C0
-		protected virtual Transform AimForRandomEnemy(bool rotate = true /* Metadata: 0x0197797E */) => default; // 0x0000000186E591C0-0x0000000186E59440
-		protected virtual Transform GetNearestEnemyTransform() => default; // 0x0000000186E59440-0x0000000186E595D0
-		protected virtual Transform AimForRandomEnemyInScreen([JetBrains.Annotations.CanBeNull] Rectangle _rect = null) => default; // 0x0000000186E595D0-0x0000000186E59660
-		public virtual void AimForRandomDirection(bool rotate = false /* Metadata: 0x0197797F */) {} // 0x0000000186E59660-0x0000000186E598D0
+			var newDirection = new Vector2();
+			var closest = GM.Core.Stage.FindClosestEnemy(_cachedTransform.position);
+
+			if (closest != null)
+			{
+				var ownerPos = _weapon.Owner.position;
+				var enemyBody = closest.body;
+				if (enemyBody != null)
+                {
+                    var distanceX = enemyBody._position.x - ownerPos.x;
+                    var distanceY = enemyBody._position.y - ownerPos.y;
+                    newDirection = DetermineDirection(distanceX, distanceY);
+                    v.x = ProjectileSpeed * newDirection.x;
+                    v.y = ProjectileSpeed * newDirection.y;
+                    return closest.transform;
+                }
+            }
+
+			var lastFacing = _weapon.Owner.LastFacingDirection;
+			newDirection = DetermineDirection(lastFacing.x, lastFacing.y);
+			if (newDirection.x == 0 && newDirection.y == 0)
+				newDirection.x = 1.0f;
+            v.x = ProjectileSpeed * newDirection.x;
+            v.y = ProjectileSpeed * newDirection.y;
+			return null;
+        }// 0x0000000186E58610-0x0000000186E58A30
+
+        public virtual Transform AimForNearestEnemyToPlayer(bool rotate = true) 
+		{
+            var ownerPos = _weapon.Owner.position;
+			var ownerRet = new Vector3(ownerPos.x, ownerPos.y);
+            var closest = GM.Core.Stage.FindClosestEnemy(ownerRet, excludeDead: true);
+
+			if (closest == null) return null;
+
+			ApplyInitialVelocity(closest.EnemyRenderer.transform, _cachedTransform, rotate, ownerRet);
+			return closest.EnemyRenderer.transform;
+        }
+		public virtual Transform AimForNearestEnemy(bool rotate = true)
+		{
+			return AimForNearestEnemyFrom(_cachedTransform, rotate, _cachedTransform.position);
+        }
+		public virtual Transform AimForNearestEnemyFrom(Transform targetT, bool rotate = true, Vector3? customFromPosition = default)
+		{
+			var closest = GetNearestEnemyTransform();
+
+            if (closest == null)
+            {
+                ApplyPlayerFacingVelocity(_weapon.Owner.LastMovementDirection.ToVector3(), rotate);
+                return null;
+            }
+
+            ApplyInitialVelocity(closest, targetT, rotate, customFromPosition);
+            return closest;
+        }
+		protected virtual Transform AimForRandomEnemy(bool rotate = true)
+		{
+			var randomEnemy = _weapon.GameMan.Stage.PickRandomEnemy(_weapon.Owner.RandomEnemyPickerGenerator);
+
+			if (randomEnemy == null)
+			{
+				ApplyPlayerFacingVelocity(_weapon.Owner.LastMovementDirection.ToVector3(), rotate);
+				return null;
+			}
+
+			ApplyInitialVelocity(randomEnemy, _cachedTransform, rotate);
+			return randomEnemy;
+		}
+		protected virtual Transform GetNearestEnemyTransform()
+		{
+            return GM.Core.Stage.FindClosestEnemy(_cachedTransform.position, excludeDead: true).EnemyRenderer.transform;
+        }
+		protected virtual Transform AimForRandomEnemyInScreen(Rectangle? _rect = null)
+		{
+			if (_rect != null)
+				return _weapon.GameMan.Stage.PickRandomEnemyInRectBounds(_rect, _weapon.Owner.RandomEnemyPickerGenerator);
+
+			return _weapon.GameMan.Stage.PickRandomEnemyInScreenBounds(_weapon.Owner.RandomEnemyPickerGenerator);
+        }
+		public virtual void AimForRandomDirection(bool rotate = false) 
+		{
+
+		}
 		public virtual void ApplyInitialVelocity(Transform target, Transform playerTransform, bool rotate = true /* Metadata: 0x01977980 */, Vector3? customFromPosition = default) {} // 0x0000000186E598D0-0x0000000186E59D40
 		public virtual void ApplyAngleVelocity(float angleAim, bool rotate = true /* Metadata: 0x01977981 */) {} // 0x0000000186E59D40-0x0000000186E59F60
 		protected virtual float RotateTowardsEnemy() => default; // 0x0000000186E59F60-0x0000000186E5A460
@@ -287,7 +361,7 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
 		public bool IsUnitDead() => default; // 0x0000000180B15290-0x0000000180B152A0
 		public float MaxHp() => default; // 0x0000000185C0CCB0-0x0000000185C0CCC0
 		public float CurrentHealth() => default; // 0x0000000185C0CCB0-0x0000000185C0CCC0
-		public GameObject GetGameObject() => default; // 0x0000000182774DD0-0x0000000182774DE0
+		public GameObject GetGameObject() => this.gameObject;
 		public void GiveReward(Action<Pickup> onRewardGiven = null) {} // 0x0000000180B15170-0x0000000180B15180
 		public float AlphaFromScale(float weaponArea, float maxScale, float minAlpha) => default; // 0x0000000186E5A460-0x0000000186E5A4C0
 
@@ -304,6 +378,24 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
 		{
 			return _weapon.GameMan.Stage.PickRandomEnemy(_weapon.Owner.RandomEnemyPickerGenerator);
 		}
+
+        private Vector2 DetermineDirection(float distanceX, float distanceY)
+        {
+            Vector2 newDirection;
+            var mag = new Vector2(distanceX, distanceY).magnitude;
+            if (mag > Vector2.kEpsilon)
+            {
+                newDirection.x = distanceX / mag;
+                newDirection.y = distanceY / mag;
+            }
+            else
+            {
+                newDirection.x = Vector2.zero.x;
+                newDirection.y = Vector2.zero.y;
+            }
+
+            return newDirection;
+        }
 
         #region Decompiled Psuedocode Reference
         /*
