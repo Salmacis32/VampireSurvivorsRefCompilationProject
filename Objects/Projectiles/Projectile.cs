@@ -1,8 +1,4 @@
-﻿/*
- * Generated code file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
- */
-
-using Unity.Profiling;
+﻿using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VampireSurvivors.Data;
@@ -13,308 +9,72 @@ using VampireSurvivors.Interfaces;
 using VampireSurvivors.Objects.Pickups;
 using VampireSurvivorsDecompProject.Objects.Pools;
 using VampireSurvivorsDecompProject.Objects.Weapons;
-using System.Collections;
 using Unity.Mathematics;
-using PartyCSharpSDK;
 using VampireSurvivors.Objects.Characters;
-using Coherence.Core;
 
 namespace VampireSurvivorsDecompProject.Objects.Projectiles
 {
-	public class Projectile : ArcadeSprite, IDamageable // TypeDefIndex: 15940
-	{
-		// Fields
-		[FormerlySerializedAs("_bounceOffWalls")]
-		[SerializeField]
-		private bool _BounceOffWalls; // 0x58
-		protected Transform _cachedTransform; // 0x60
-		protected Weapon _weapon; // 0x68
-		protected int _indexInWeapon; // 0x70
-		protected Transform _targetTransform; // 0x78
-		protected SpriteRenderer _renderer; // 0x80
-		protected GameSessionData _gameSessionData; // 0x88
-		protected Camera _mainCamera; // 0x90
-		protected SpriteTrail _spriteTrail; // 0x98
-		private float _pauseWallChecksTimer; // 0xA0
-		[NonSerialized]
-		public float _speed; // 0xA4
-		protected int _penetrating; // 0xA8
-		protected int _bounces; // 0xAC
-		protected bool _isCullable; // 0xB0
-		protected bool _bounceActivated; // 0xB1
-		protected ArcadeSprite _sprite; // 0xB8
-		protected BulletPool _pool; // 0xC0
-		protected readonly HashSet<IDamageable> _objectsHit; // 0xC8
-		private static readonly ProfilerMarker _markerInitProjectile; // 0x00
-	
-		// Properties
-		public HashSet<IDamageable> ObjectsHit { get => _objectsHit; } // 0x00000001827666D0-0x00000001827666E0 
-		public virtual float ProjectileSpeed { get => Weapon.PSpeed() * GameManager.ProjectileSpeed * _speed; } // 0x0000000186E56590-0x0000000186E56630 
-		public int IndexInWeapon { get => default; } // 0x00000001819A0220-0x00000001819A0230 
-		public Weapon Weapon { get => default; } // 0x00000001819A0210-0x00000001819A0220 
-		protected Vector2 Velocity { get => _sprite.body._velocity; private set { _sprite.body._velocity = value; } } // 0x0000000186E56630-0x0000000186E56660 0x0000000184C486A0-0x0000000184C486E0
-	
-		// Constructors
-		public Projectile() 
-		{
-			_speed = 1.0f;
-			_isCullable = true;
-			_objectsHit = new HashSet<IDamageable>();
-		} // 0x0000000186E5A4C0-0x0000000186E5A5D0
-		static Projectile() {} // 0x0000000186E5A5D0-0x0000000186E5A640
-	
-		// Methods
-		protected virtual new void Awake() 
-		{
-			_cachedTransform = this.GetComponent<Transform>();
-			_renderer = this.GetComponentInChildren<SpriteRenderer>();
-			_spriteTrail = this.GetComponentInChildren<SpriteTrail>();
-			_mainCamera = Camera.main;
-			_bounceActivated = false;
-			_sprite = this;
-		} // 0x0000000186E56660-0x0000000186E568B0
-		protected override void OnUpdate() 
-		{
-			CheckIfVisibleOnScreen();
-			if (_pauseWallChecksTimer > 0)
-			{
-				_pauseWallChecksTimer -= PauseSystem.DeltaTime;
-			}
-		} // 0x0000000186D95110-0x0000000186D95160
-		public virtual void InitProjectile(BulletPool pool, Weapon weapon, int index) 
-		{
-			_gameSessionData = GM.Core.GameSessionData;
-			_pool = pool;
-			_weapon = weapon;
-			_indexInWeapon = index;
-			if (_objectsHit.Count >0)
-				_objectsHit.Clear();
-			_bounces = weapon.PBounces();
-			if (body == null)
-				ArcadePhysics.scene.physics.world.enableBody(this);
+    public class Projectile : ArcadeSprite, IDamageable
+    {
+        [NonSerialized]
+        public float _speed;
+        protected readonly HashSet<IDamageable> _objectsHit;
+        protected bool _bounceActivated;
+        protected int _bounces;
+        protected Transform _cachedTransform;
+        protected GameSessionData _gameSessionData;
+        protected int _indexInWeapon;
+        protected bool _isCullable;
+        protected Camera _mainCamera;
+        protected int _penetrating;
+        protected BulletPool _pool;
+        protected SpriteRenderer _renderer;
+        protected ArcadeSprite _sprite;
+        protected SpriteTrail _spriteTrail;
+        protected Transform _targetTransform;
+        protected Weapon _weapon;
+        private static readonly ProfilerMarker _markerInitProjectile;
 
-			PhysicsManager.Instance._bulletGroup.add(this._sprite);
-			if (_spriteTrail)
-				_spriteTrail.Reset();
-
-			if (!weapon.SpawnedProjectiles.Contains(this))
-				weapon.SpawnedProjectiles.Add(this);
-
-			GM.Core.ParticleManager.RegisterParticleSystem(this.GetComponentInChildren<ParticleSystem>());
-		} // 0x0000000186E568B0-0x0000000186E56CF0
-		public virtual void SetNullTarget() 
-		{
-			_targetTransform = null;
-		} // 0x0000000186E56CF0-0x0000000186E56D50
-		public virtual void SetTarget(Transform target) 
-		{
-			_targetTransform = target;
-		} // 0x0000000181917690-0x00000001819176F0
-		public void SetVelocity(Vector2 velocity) 
-		{
-			_sprite.body._velocity = velocity;
-		} // 0x0000000186E56D50-0x0000000186E56D90
-		public virtual void InternalUpdate() {} // 0x0000000180B15170-0x0000000180B15180
-		public bool HasAlreadyHitPickUpObject(IDamageable damageable)
+        [FormerlySerializedAs("_bounceOffWalls")]
+        [SerializeField]
+        private bool _BounceOffWalls; // 0x58
+        private float _pauseWallChecksTimer; // 0xA0
+        static Projectile()
         {
-            return HasAlreadyHitObject(damageable);
-        }// 0x0000000186E56D90-0x0000000186E56E40
+        }
 
-		public bool HasAlreadyHitObject(IDamageable damageable)
-		{
-			if (ObjectHitCheck(damageable)) return true;
+        // Constructors
+        public Projectile()
+        {
+            _speed = 1.0f;
+            _isCullable = true;
+            _objectsHit = new HashSet<IDamageable>();
+        }
 
-			OnHasHitAnObject(damageable);
+        public int IndexInWeapon { get => default; }
 
-			return false;
-		}// 0x0000000186E56E40-0x0000000186E56F00
-		public bool HasAlreadyHitPlayerObject(IDamageable damageable) 
-		{
-            if (ObjectHitCheck(damageable)) return true;
+        public HashSet<IDamageable> ObjectsHit { get => _objectsHit; }
 
-            OnHasHitAnotherPlayerObject(damageable);
+        public virtual float ProjectileSpeed { get => Weapon.PSpeed() * GameManager.ProjectileSpeed * _speed; }
 
-            return false;
-        } // 0x0000000186E56F00-0x0000000186E56FC0
-		public void AddObjectHit(IDamageable obj) 
-		{
+        public Weapon Weapon { get => default; }
+
+        protected Vector2 Velocity
+        { get => _sprite.body._velocity; private set { _sprite.body._velocity = value; } }
+
+        public void AddObjectHit(IDamageable obj)
+        {
             _objectsHit.Add(obj);
-        } // 0x0000000186E56FC0-0x0000000186E57030
-		public float AngleFromTargetRadians(Transform target, Transform playerTransform)
-		{
-			if (target == null) target = PickRandomEnemy();
-
-			return Mathf.Atan2(target.position.y - playerTransform.position.y, target.position.x - playerTransform.position.x);
-		}// 0x0000000186E57030-0x0000000186E572A0
-		public void ApplyPlayerFacingVelocity(Vector3 playerDirection, bool rotate = true /* Metadata: 0x01977975 */) 
-		{
-			var normal = playerDirection.normalized;
-			if (normal.x == 0.0f && normal.y == 0.0f)
-				normal.x = 1.0f;
-			Velocity = new float2(ProjectileSpeed * normal.x, ProjectileSpeed * normal.y);
-
-			if (rotate)
-			{
-				var angle = Mathf.Atan2(normal.y, normal.x);
-				transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-			}
-		} // 0x0000000186E572A0-0x0000000186E57560
-		public void ApplyInversePlayerFacingVelocity(Vector3 playerDirection, bool rotate = true /* Metadata: 0x01977976 */) 
-		{
-            var normal = playerDirection.normalized;
-            if (normal.x == 0.0f && normal.y == 0.0f)
-                normal.x = 1.0f;
-            Velocity = new float2(ProjectileSpeed * -normal.x, ProjectileSpeed * -normal.y);
-
-            if (rotate)
-            {
-                var angle = Mathf.Atan2(normal.y, normal.x);
-                transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-            }
-        } // 0x0000000186E57560-0x0000000186E57840
-		public virtual void OnHasHitWallPhaser(PhaserTile tile) {} // 0x0000000186BB8730-0x0000000186BB8750
-		public virtual bool CanExplode() => default; // 0x0000000180B15290-0x0000000180B152A0
-		public virtual void Explode(Vector2? position = default) {} // 0x0000000180B15170-0x0000000180B15180
-		private void CheckIfVisibleOnScreen() 
-		{
-			if (_mainCamera == null) throw new NullReferenceException();
-			var camPos = _mainCamera.transform.position;
-			var ortho = _mainCamera.orthographicSize;
-			var aspect = _mainCamera.aspect;
-			var view = (aspect * ortho);
-
-            var yMinusOrtho = camPos.y - ortho;
-			var xMinusAspectTimesOrtho = camPos.x - view;
-			var aspectTimesOrthoTimes2 = view * 2;
-
-            if (transform.position.x < xMinusAspectTimesOrtho
-				|| aspectTimesOrthoTimes2 <= transform.position.x
-				|| transform.position.y < yMinusOrtho
-				|| yMinusOrtho + (ortho * 2) <= transform.position.y)
-			{
-				Despawn();
-			}
-		} // 0x0000000186E57840-0x0000000186E57AC0
-		public virtual void Despawn()
-		{
-			PhysicsManager.Instance._bulletGroup.remove(this._sprite);
-
-			body._enable = false;
-
-			if (Weapon.SpawnedProjectiles?.Contains(this) ?? false)
-			{
-				Weapon.SpawnedProjectiles.Remove(this);
-			}
-
-			_pool.Return(this);
-		} // 0x0000000186E57AC0-0x0000000186E57D40
-		protected void SetScaleToArea(float multiplier = 1f /* Metadata: 0x01977977 */) 
-		{
-			var one = Vector3.one;
-			var area = _weapon.PArea();
-            _cachedTransform.localScale = new Vector3((one.x * area) * multiplier, (one.y * area) * multiplier, (one.z * area) * multiplier);
-		} // 0x0000000186E57D40-0x0000000186E57E90
-		protected Vector2 SetVelocityFromRotation(float rotation, float speed)
-		{
-			var vel = this.Velocity.ToFloat2();
-			ArcadePhysics.Instance.velocityFromRotation(rotation, speed, ref vel);
-			Velocity = vel;
-			return vel;
-		}// 0x0000000186E57E90-0x0000000186E57F20
-		public bool TryFreeze(IDamageable target)
-		{
-			var chance = _weapon.GetChanceFromArray();
-			var luck = _weapon.Owner.PLuck();
-			var freezeChance = luck * _weapon.FreezeChance;
-			if (freezeChance > chance)
-			{
-				var enemyCont = target.GetGameObject()?.GetComponent<EnemyController>();
-				if (enemyCont != null)
-				{
-					var duration = _weapon.PDuration();
-					if (!enemyCont.Freeze(duration, _weapon.FreezeChance))
-						return false;
-				}
-
-				if (!_weapon.HasActiveArcanaOfType(ArcanaType.T12_OUT_OF_TIME))
-					return false;
-
-				var arcanaMan = _weapon.GameMan.ArcanaManager;
-				if (enemyCont != null)
-				{
-					arcanaMan.TriggerColdExplosion(enemyCont.transform.position);
-					return true;
-				}
-			}
-			return false;
-		}// 0x0000000186E57F20-0x0000000186E58310
-		public bool TryDefang(IDamageable target)
-		{
-			var chance = _weapon.GetChanceFromArray();
-			var defang = _weapon.DefangChance;
-			var owner = _weapon.Owner;
-			var defanged = (owner.PLuck() * defang) > chance;
-			if (!defanged)
-				return false;
-
-			var controller = target.GetGameObject()?.GetComponent<EnemyController>();
-			if (controller != null)
-			{
-				return controller.DoDefang();
-			}
-			return false;
-		}// 0x0000000186E58310-0x0000000186E585C0
-		protected virtual void OnHasHitAnObject(IDamageable other) {} // 0x0000000180B15170-0x0000000180B15180
-		protected virtual void OnHasHitAnotherPlayerObject(IDamageable other) {} // 0x0000000180B15170-0x0000000180B15180
-        public float AngleFromVelocity(Vector2 velocity) => Mathf.Atan2(velocity.x, velocity.y) * Mathf.Rad2Deg;// 0x0000000186E585C0-0x0000000186E585F0
-        protected float AngleFromVelocityRadians(Vector2 velocity) => Mathf.Atan2(velocity.x, velocity.y); // 0x0000000186E585F0-0x0000000186E58610
-		protected Transform SetForNearestEnemy(ref Vector2 v)
-		{
-			var newDirection = new Vector2();
-			var closest = GM.Core.Stage.FindClosestEnemy(_cachedTransform.position);
-
-			if (closest != null)
-			{
-				var ownerPos = _weapon.Owner.position;
-				var enemyBody = closest.body;
-				if (enemyBody != null)
-                {
-                    var distanceX = enemyBody._position.x - ownerPos.x;
-                    var distanceY = enemyBody._position.y - ownerPos.y;
-                    newDirection = DetermineDirection(distanceX, distanceY);
-                    v.x = ProjectileSpeed * newDirection.x;
-                    v.y = ProjectileSpeed * newDirection.y;
-                    return closest.transform;
-                }
-            }
-
-			var lastFacing = _weapon.Owner.LastFacingDirection;
-			newDirection = DetermineDirection(lastFacing.x, lastFacing.y);
-			if (newDirection.x == 0 && newDirection.y == 0)
-				newDirection.x = 1.0f;
-            v.x = ProjectileSpeed * newDirection.x;
-            v.y = ProjectileSpeed * newDirection.y;
-			return null;
-        }// 0x0000000186E58610-0x0000000186E58A30
-
-        public virtual Transform AimForNearestEnemyToPlayer(bool rotate = true) 
-		{
-            var ownerPos = _weapon.Owner.position;
-			var ownerRet = new Vector3(ownerPos.x, ownerPos.y);
-            var closest = GM.Core.Stage.FindClosestEnemy(ownerRet, excludeDead: true);
-
-			if (closest == null) return null;
-
-			ApplyInitialVelocity(closest.EnemyRenderer.transform, _cachedTransform, rotate, ownerRet);
-			return closest.EnemyRenderer.transform;
         }
-		public virtual Transform AimForNearestEnemy(bool rotate = true)
-		{
-			return AimForNearestEnemyFrom(_cachedTransform, rotate, _cachedTransform.position);
+
+        public virtual Transform AimForNearestEnemy(bool rotate = true)
+        {
+            return AimForNearestEnemyFrom(_cachedTransform, rotate, _cachedTransform.position);
         }
-		public virtual Transform AimForNearestEnemyFrom(Transform targetT, bool rotate = true, Vector3? customFromPosition = default)
-		{
-			var closest = GetNearestEnemyTransform();
+
+        public virtual Transform AimForNearestEnemyFrom(Transform targetT, bool rotate = true, Vector3? customFromPosition = default)
+        {
+            var closest = GetNearestEnemyTransform();
 
             if (closest == null)
             {
@@ -325,45 +85,347 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
             ApplyInitialVelocity(closest, targetT, rotate, customFromPosition);
             return closest;
         }
-		protected virtual Transform AimForRandomEnemy(bool rotate = true)
-		{
-			var randomEnemy = _weapon.GameMan.Stage.PickRandomEnemy(_weapon.Owner.RandomEnemyPickerGenerator);
 
-			if (randomEnemy == null)
-			{
-				ApplyPlayerFacingVelocity(_weapon.Owner.LastMovementDirection.ToVector3(), rotate);
-				return null;
-			}
+        public virtual Transform AimForNearestEnemyToPlayer(bool rotate = true)
+        {
+            var ownerPos = _weapon.Owner.position;
+            var ownerRet = new Vector3(ownerPos.x, ownerPos.y);
+            var closest = GM.Core.Stage.FindClosestEnemy(ownerRet, excludeDead: true);
 
-			ApplyInitialVelocity(randomEnemy, _cachedTransform, rotate);
-			return randomEnemy;
-		}
-		protected virtual Transform GetNearestEnemyTransform()
-		{
+            if (closest == null) return null;
+
+            ApplyInitialVelocity(closest.EnemyRenderer.transform, _cachedTransform, rotate, ownerRet);
+            return closest.EnemyRenderer.transform;
+        }
+
+        public virtual void AimForRandomDirection(bool rotate = false)
+        {
+            var rng = UnityEngine.Random.Range(0.0f, (float)(Math.PI * 2));
+            var speedCos = ProjectileSpeed * Mathf.Cos(rng);
+            var speedSin = ProjectileSpeed * Mathf.Sin(rng);
+            SetInitialVelocity(rotate, new Vector2(speedCos, speedSin));
+        }
+
+        public float AlphaFromScale(float weaponArea, float maxScale, float minAlpha) => default;
+
+        public float AngleFromTargetRadians(Transform target, Transform playerTransform)
+        {
+            if (target == null) target = PickRandomEnemy();
+
+            return Mathf.Atan2(target.position.y - playerTransform.position.y, target.position.x - playerTransform.position.x);
+        }
+
+        public float AngleFromVelocity(Vector2 velocity) => Mathf.Atan2(velocity.x, velocity.y) * Mathf.Rad2Deg;
+
+        public virtual void ApplyAngleVelocity(float angleAim, bool rotate = true)
+        {
+            SetInitialVelocity(rotate, new Vector2(Mathf.Cos(angleAim), Mathf.Sin(angleAim)));
+        }
+
+        public virtual void ApplyInitialVelocity(Transform target, Transform refTransform, bool rotate = true, Vector3? customFromPosition = default)
+        {
+            InitialVelocityApplication(target, refTransform, rotate, customFromPosition);
+        }
+
+        public void ApplyInversePlayerFacingVelocity(Vector3 playerDirection, bool rotate = true)
+        {
+            PlayerFacingVelocityApplication(playerDirection, rotate, inverse: true);
+        }
+
+        public void ApplyPlayerFacingVelocity(Vector3 playerDirection, bool rotate = true)
+        {
+            PlayerFacingVelocityApplication(playerDirection, rotate);
+        }
+
+        public virtual bool CanExplode() => default;
+
+        public float CurrentHealth() => default;
+
+        public virtual void Despawn()
+        {
+            PhysicsManager.Instance._bulletGroup.remove(this._sprite);
+
+            body._enable = false;
+
+            if (Weapon.SpawnedProjectiles?.Contains(this) ?? false)
+            {
+                Weapon.SpawnedProjectiles.Remove(this);
+            }
+
+            _pool.Return(this);
+        }
+        public virtual void Explode(Vector2? position = default)
+        { }
+
+        public void GetDamaged(float value, HitVfxType showHitVfx = HitVfxType.Default, float damageKnockBack = 1f /* Metadata: 0x01977983 */, WeaponType damageType = WeaponType.VOID /* Metadata: 0x01977987 */, bool hasKb = true /* Metadata: 0x01977988 */)
+        { }
+
+        public GameObject GetGameObject() => this.gameObject;
+
+        public void GiveReward(Action<Pickup> onRewardGiven = null)
+        { }
+
+        public bool HasAlreadyHitObject(IDamageable damageable)
+        {
+            if (ObjectHitCheck(damageable)) return true;
+
+            OnHasHitAnObject(damageable);
+
+            return false;
+        }
+
+        public bool HasAlreadyHitPickUpObject(IDamageable damageable)
+        {
+            return HasAlreadyHitObject(damageable);
+        }
+
+        public bool HasAlreadyHitPlayerObject(IDamageable damageable)
+        {
+            if (ObjectHitCheck(damageable)) return true;
+
+            OnHasHitAnotherPlayerObject(damageable);
+
+            return false;
+        }
+
+        public virtual void InitProjectile(BulletPool pool, Weapon weapon, int index)
+        {
+            _gameSessionData = GM.Core.GameSessionData;
+            _pool = pool;
+            _weapon = weapon;
+            _indexInWeapon = index;
+            if (_objectsHit.Count > 0)
+                _objectsHit.Clear();
+            _bounces = weapon.PBounces();
+            if (body == null)
+                ArcadePhysics.scene.physics.world.enableBody(this);
+
+            PhysicsManager.Instance._bulletGroup.add(this._sprite);
+            if (_spriteTrail)
+                _spriteTrail.Reset();
+
+            if (!weapon.SpawnedProjectiles.Contains(this))
+                weapon.SpawnedProjectiles.Add(this);
+
+            GM.Core.ParticleManager.RegisterParticleSystem(this.GetComponentInChildren<ParticleSystem>());
+        }
+
+        public virtual void InternalUpdate()
+        { }
+
+        public bool IsUnitDead() => default;
+
+        public float MaxHp() => default;
+
+        public void OnGetDamaged(HitVfxType hitVfxType, bool hasKb = true /* Metadata: 0x01977989 */)
+        { }
+
+        public virtual void OnHasHitWallPhaser(PhaserTile tile)
+        { }
+
+        public virtual void SetNullTarget()
+        {
+            _targetTransform = null;
+        }
+
+        public virtual void SetTarget(Transform target)
+        {
+            _targetTransform = target;
+        }
+
+        public void SetVelocity(Vector2 velocity)
+        {
+            _sprite.body._velocity = velocity;
+        }
+
+        public bool TryDefang(IDamageable target)
+        {
+            var chance = _weapon.GetChanceFromArray();
+            var defang = _weapon.DefangChance;
+            var owner = _weapon.Owner;
+            var defanged = (owner.PLuck() * defang) > chance;
+            if (!defanged)
+                return false;
+
+            var controller = target.GetGameObject()?.GetComponent<EnemyController>();
+            if (controller != null)
+            {
+                return controller.DoDefang();
+            }
+            return false;
+        }
+
+        public bool TryFreeze(IDamageable target)
+        {
+            var chance = _weapon.GetChanceFromArray();
+            var luck = _weapon.Owner.PLuck();
+            var freezeChance = luck * _weapon.FreezeChance;
+            if (freezeChance > chance)
+            {
+                var enemyCont = target.GetGameObject()?.GetComponent<EnemyController>();
+                if (enemyCont != null)
+                {
+                    var duration = _weapon.PDuration();
+                    if (!enemyCont.Freeze(duration, _weapon.FreezeChance))
+                        return false;
+                }
+
+                if (!_weapon.HasActiveArcanaOfType(ArcanaType.T12_OUT_OF_TIME))
+                    return false;
+
+                var arcanaMan = _weapon.GameMan.ArcanaManager;
+                if (enemyCont != null)
+                {
+                    arcanaMan.TriggerColdExplosion(enemyCont.transform.position);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected virtual Transform AimForRandomEnemy(bool rotate = true)
+        {
+            var randomEnemy = _weapon.GameMan.Stage.PickRandomEnemy(_weapon.Owner.RandomEnemyPickerGenerator);
+
+            if (randomEnemy == null)
+            {
+                ApplyPlayerFacingVelocity(_weapon.Owner.LastMovementDirection.ToVector3(), rotate);
+                return null;
+            }
+
+            ApplyInitialVelocity(randomEnemy, _cachedTransform, rotate);
+            return randomEnemy;
+        }
+
+        protected virtual Transform AimForRandomEnemyInScreen(Rectangle? _rect = null)
+        {
+            if (_rect != null)
+                return _weapon.GameMan.Stage.PickRandomEnemyInRectBounds(_rect, _weapon.Owner.RandomEnemyPickerGenerator);
+
+            return _weapon.GameMan.Stage.PickRandomEnemyInScreenBounds(_weapon.Owner.RandomEnemyPickerGenerator);
+        }
+
+        // 0x0000000186E585C0-0x0000000186E585F0
+        protected float AngleFromVelocityRadians(Vector2 velocity) => Mathf.Atan2(velocity.x, velocity.y);
+
+        // Methods
+        protected virtual new void Awake()
+        {
+            _cachedTransform = this.GetComponent<Transform>();
+            _renderer = this.GetComponentInChildren<SpriteRenderer>();
+            _spriteTrail = this.GetComponentInChildren<SpriteTrail>();
+            _mainCamera = Camera.main;
+            _bounceActivated = false;
+            _sprite = this;
+        } // 0x0000000186E56660-0x0000000186E568B0
+
+        protected virtual Transform GetNearestEnemyTransform()
+        {
             return GM.Core.Stage.FindClosestEnemy(_cachedTransform.position, excludeDead: true).EnemyRenderer.transform;
         }
-		protected virtual Transform AimForRandomEnemyInScreen(Rectangle? _rect = null)
-		{
-			if (_rect != null)
-				return _weapon.GameMan.Stage.PickRandomEnemyInRectBounds(_rect, _weapon.Owner.RandomEnemyPickerGenerator);
 
-			return _weapon.GameMan.Stage.PickRandomEnemyInScreenBounds(_weapon.Owner.RandomEnemyPickerGenerator);
+        protected virtual void OnHasHitAnObject(IDamageable other)
+        { }
+
+        protected virtual void OnHasHitAnotherPlayerObject(IDamageable other)
+        { }
+
+        protected override void OnUpdate()
+        {
+            CheckIfVisibleOnScreen();
+            if (_pauseWallChecksTimer > 0)
+            {
+                _pauseWallChecksTimer -= PauseSystem.DeltaTime;
+            }
         }
-		public virtual void AimForRandomDirection(bool rotate = false) 
-		{
 
-		}
-		public virtual void ApplyInitialVelocity(Transform target, Transform playerTransform, bool rotate = true /* Metadata: 0x01977980 */, Vector3? customFromPosition = default) {} // 0x0000000186E598D0-0x0000000186E59D40
-		public virtual void ApplyAngleVelocity(float angleAim, bool rotate = true /* Metadata: 0x01977981 */) {} // 0x0000000186E59D40-0x0000000186E59F60
-		protected virtual float RotateTowardsEnemy() => default; // 0x0000000186E59F60-0x0000000186E5A460
-		public void GetDamaged(float value, HitVfxType showHitVfx = HitVfxType.Default /* Metadata: 0x01977982 */, float damageKnockBack = 1f /* Metadata: 0x01977983 */, WeaponType damageType = WeaponType.VOID /* Metadata: 0x01977987 */, bool hasKb = true /* Metadata: 0x01977988 */) {} // 0x0000000180B15170-0x0000000180B15180
-		public void OnGetDamaged(HitVfxType hitVfxType, bool hasKb = true /* Metadata: 0x01977989 */) {} // 0x0000000180B15170-0x0000000180B15180
-		public bool IsUnitDead() => default; // 0x0000000180B15290-0x0000000180B152A0
-		public float MaxHp() => default; // 0x0000000185C0CCB0-0x0000000185C0CCC0
-		public float CurrentHealth() => default; // 0x0000000185C0CCB0-0x0000000185C0CCC0
-		public GameObject GetGameObject() => this.gameObject;
-		public void GiveReward(Action<Pickup> onRewardGiven = null) {} // 0x0000000180B15170-0x0000000180B15180
-		public float AlphaFromScale(float weaponArea, float maxScale, float minAlpha) => default; // 0x0000000186E5A460-0x0000000186E5A4C0
+        protected virtual float RotateTowardsEnemy()
+        {
+            var closest = GetNearestEnemyTransform();
+
+            if (closest == null)
+            {
+                return PlayerFacingVelocityApplication(_weapon.Owner.LastMovementDirection.ToVector3(), true).GetValueOrDefault();
+            }
+
+            return InitialVelocityApplication(closest, this._cachedTransform, true, null).GetValueOrDefault();
+        }
+
+        protected Transform SetForNearestEnemy(ref Vector2 v)
+        {
+            var newDirection = new Vector2();
+            var closest = GM.Core.Stage.FindClosestEnemy(_cachedTransform.position);
+
+            if (closest != null)
+            {
+                var ownerPos = _weapon.Owner.position;
+                var enemyBody = closest.body;
+                if (enemyBody != null)
+                {
+                    var distanceX = enemyBody._position.x - ownerPos.x;
+                    var distanceY = enemyBody._position.y - ownerPos.y;
+                    newDirection = new Vector2(distanceX, distanceY).normalized;
+                    v.x = ProjectileSpeed * newDirection.x;
+                    v.y = ProjectileSpeed * newDirection.y;
+                    return closest.transform;
+                }
+            }
+
+            var lastFacing = _weapon.Owner.LastFacingDirection;
+            newDirection = lastFacing.normalized;
+            if (newDirection.x == 0 && newDirection.y == 0)
+                newDirection.x = 1.0f;
+            v.x = ProjectileSpeed * newDirection.x;
+            v.y = ProjectileSpeed * newDirection.y;
+            return null;
+        }
+
+        protected void SetScaleToArea(float multiplier = 1f /* Metadata: 0x01977977 */)
+        {
+            var one = Vector3.one;
+            var area = _weapon.PArea();
+            _cachedTransform.localScale = new Vector3((one.x * area) * multiplier, (one.y * area) * multiplier, (one.z * area) * multiplier);
+        }
+
+        protected Vector2 SetVelocityFromRotation(float rotation, float speed)
+        {
+            var vel = this.Velocity.ToFloat2();
+            ArcadePhysics.Instance.velocityFromRotation(rotation, speed, ref vel);
+            Velocity = vel;
+            return vel;
+        }
+
+        private void CheckIfVisibleOnScreen()
+        {
+            if (_mainCamera == null) throw new NullReferenceException();
+            var camPos = _mainCamera.transform.position;
+            var ortho = _mainCamera.orthographicSize;
+            var aspect = _mainCamera.aspect;
+            var view = (aspect * ortho);
+
+            var yMinusOrtho = camPos.y - ortho;
+            var xMinusAspectTimesOrtho = camPos.x - view;
+            var aspectTimesOrthoTimes2 = view * 2;
+
+            if (transform.position.x < xMinusAspectTimesOrtho
+                || aspectTimesOrthoTimes2 <= transform.position.x
+                || transform.position.y < yMinusOrtho
+                || yMinusOrtho + (ortho * 2) <= transform.position.y)
+            {
+                Despawn();
+            }
+        }
+
+        private float? InitialVelocityApplication(Transform target, Transform refTransform, bool rotate, Vector3? customFromPosition)
+        {
+            Vector3 initial = Vector3.zero;
+            if (customFromPosition.HasValue)
+                initial = customFromPosition.Value;
+            else
+                initial = refTransform.position;
+
+            return SetInitialVelocity(rotate, new Vector2(target.position.x - initial.x, target.position.y - initial.y));
+        }
 
         private bool ObjectHitCheck(IDamageable damageable)
         {
@@ -374,92 +436,40 @@ namespace VampireSurvivorsDecompProject.Objects.Projectiles
             return false;
         }
 
-		private Transform PickRandomEnemy()
-		{
-			return _weapon.GameMan.Stage.PickRandomEnemy(_weapon.Owner.RandomEnemyPickerGenerator);
-		}
-
-        private Vector2 DetermineDirection(float distanceX, float distanceY)
+        private Transform PickRandomEnemy()
         {
-            Vector2 newDirection;
-            var mag = new Vector2(distanceX, distanceY).magnitude;
-            if (mag > Vector2.kEpsilon)
-            {
-                newDirection.x = distanceX / mag;
-                newDirection.y = distanceY / mag;
-            }
-            else
-            {
-                newDirection.x = Vector2.zero.x;
-                newDirection.y = Vector2.zero.y;
-            }
-
-            return newDirection;
+            return _weapon.GameMan.Stage.PickRandomEnemy(_weapon.Owner.RandomEnemyPickerGenerator);
         }
 
-        #region Decompiled Psuedocode Reference
-        /*
-		// Void OnUpdate()
-		void __fastcall VampireSurvivors::Objects::Projectiles::Projectile::OnUpdate(Projectile *this)
-		{
-			float pauseWallChecksTimer; // xmm1_4
+        private float? PlayerFacingVelocityApplication(Vector3 playerDirection, bool rotate, bool inverse = false)
+        {
+            var normal = playerDirection.normalized;
+            if (normal.x == 0.0f && normal.y == 0.0f)
+                normal.x = 1.0f;
+            if (inverse) normal.y *= -1.0f; normal.x *= -1.0f;
+            Velocity = new float2(ProjectileSpeed * normal.x, ProjectileSpeed * normal.y);
 
-			VampireSurvivors::Objects::Projectiles::Projectile::CheckIfVisibleOnScreen((VampireSurvivors::Objects::Projectiles::Projectile *)this);
-			pauseWallChecksTimer = this->fields._pauseWallChecksTimer;
-			if ( pauseWallChecksTimer > 0.0 )
-			{
-				PauseSystem::get_DeltaTime(0);
-				this->fields._pauseWallChecksTimer = pauseWallChecksTimer - 0.0;
-			}
-		}	
+            if (rotate)
+            {
+                var angle = Mathf.Atan2(normal.y, normal.x);
+                transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+                return angle;
+            }
+            return null;
+        }
 
-		// Void Awake()
-		void __fastcall VampireSurvivors::Objects::Projectiles::Projectile::Awake(Projectile *this)
-		{
-		  struct Transform *trans; // rax
-		  bool v3; // zf
-		  __int64 *v4; // rdx
-		  signed __int64 v5; // rtt
-		  struct SpriteRenderer *renderer; // rax
-		  __int64 *v7; // rdx
-		  signed __int64 v8; // rtt
-		  struct SpriteTrail *v9; // rax
-		  __int64 *v10; // rdx
-		  signed __int64 v11; // rtt
-		  int v12; // eax
-		  __int64 *v13; // rdx
-		  signed __int64 v14; // rtt
-		  unsigned int v15; // ebx
-		  unsigned __int64 v16; // rax
-		  char v17; // bl
-		  __int64 *v18; // rdx
-		  signed __int64 v19; // rtt
-		  signed __int32 v20[10]; // [rsp+0h] [rbp-28h] BYREF
+        private float? SetInitialVelocity(bool rotate, Vector2 difference)
+        {
+            Velocity = new Vector2(difference.x, difference.y).normalized;
 
-		  if...
-		  trans = (struct Transform *)UnityEngine::Component::GetComponent<System::Object>(
-										this,
-										MethodInfo::UnityEngine::Component::GetComponent<UnityEngine::Transform>);
-		  v3 = dword_189483790 == 0;
-		  this->fields._cachedTransform = trans;
-		  if...
-		  renderer = (struct SpriteRenderer *)UnityEngine::Component::GetComponentInChildren<System::Object>((UnityEngine::Component *)this);
-		  v3 = dword_189483790 == 0;
-		  this->fields._renderer = renderer;
-		  if...
-		  v9 = (struct SpriteTrail *)UnityEngine::Component::GetComponentInChildren<System::Object>((UnityEngine::Component *)this);
-		  v3 = dword_189483790 == 0;
-		  this->fields._spriteTrail = v9;
-		  if...
-		  this->fields._mainCamera = (struct Camera *)UnityEngine::Camera::get_main(0);
-		  v12 = dword_189483790;
-		  if...
-		  this->fields._bounceActivated = 0;
-		  this->fields._sprite = (struct ArcadeSprite *)this;
-		  if...
-		}
-
-		*/
-        #endregion Decompiled Psuedocode Reference
+            if (rotate)
+            {
+                var angle = Mathf.Atan2(difference.y, difference.x);
+                var rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+                transform.rotation = rotation;
+                return angle;
+            }
+            return null;
+        }
     }
 }
