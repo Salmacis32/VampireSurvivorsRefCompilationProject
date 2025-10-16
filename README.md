@@ -13,4 +13,5 @@ Credit and thanks to the following for getting me this far to begin with:
 - [LukeFZ and his fork of Il2CppInspector](https://github.com/LukeFZ/Il2CppInspectorRedux) that I used for decompilation.
 - [The Unity CS Reference](https://github.com/Unity-Technologies/UnityCsReference) for help with Unity code.
 - [Takacomic for his work on Director's Assistant](https://github.com/takacomic/DirectersAssistant/tree/master), of which I used for reference when first starting this project.
+- @whendeh (lukeod) for putting together [some extra documentation on the game's systems](https://github.com/lukeod/vampiresurvivors-modding).
 - The #Modding channel in the official Vampire Survivor's discord for moral suppport and communication with poncle.
