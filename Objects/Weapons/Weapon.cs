@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Coherence.Core;
+using Newtonsoft.Json.Linq;
+using Rewired.Demos;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Coherence.Core;
-using Newtonsoft.Json.Linq;
 using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEngine;
@@ -17,6 +18,9 @@ using VampireSurvivors.Objects;
 using VampireSurvivors.Objects.Characters;
 using VampireSurvivorsDecompProject.Objects.Pools;
 using VampireSurvivorsDecompProject.Objects.Projectiles;
+using static Coherence.Core.NativeTransport;
+using static UnityEngine.ParticleSystem;
+using CharacterController = VampireSurvivors.Objects.Characters.CharacterController;
 
 namespace VampireSurvivorsDecompProject.Objects.Weapons
 {
@@ -203,31 +207,105 @@ namespace VampireSurvivorsDecompProject.Objects.Weapons
 				world.addColliderDirect(setCollider);
 			}
         }
-		public virtual float2 GetFiringVector() => default; // 0x00000001870CC270-0x00000001870CC2B0
-		protected virtual bool OnBulletOverlapsEnemy(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first) => default; // 0x00000001870CC2B0-0x00000001870CC3D0
-		protected virtual bool OnBulletOverlapsPlayer(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first) => default; // 0x00000001870CC3D0-0x00000001870CC640
-		protected virtual bool OnSecondaryBulletOverlapsEnemy(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first) => default; // 0x00000001870CC640-0x00000001870CC7E0
-		protected virtual bool OnSecondaryBulletOverlapsEnemyCurse(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first) => default; // 0x00000001870CC7E0-0x00000001870CC980
-		protected virtual bool OnBulletOverlapsEnemyRetaliation(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first)
+		public virtual float2 GetFiringVector() => new float2(Owner.LastFacingDirection.x, Owner.LastFacingDirection.y);
+		protected virtual bool OnBulletOverlapsEnemy(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first)
 		{
-			var enemy = first.gameObject.GetComponent<EnemyController>();
-			if (enemy.IsDead) return false;
+            var enemy = first.gameObject.GetComponent<EnemyController>();
+            if (enemy.IsDead) return false;
 
+            var projectile = second.gameObject.GetComponent<Projectile>();
+            if (!projectile.HasAlreadyHitObject(enemy))
+            {
+				DealDamage(enemy);
+            }
+            return false;
+        }
+		protected virtual bool OnBulletOverlapsPlayer(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first)
+		{
+			var character = first.gameObject.GetComponent<CharacterController>();
+			if (character.IsDead || character.IsDisconnectedFromOnlinePlay || character == Owner) return false;
+			
 			var projectile = second.gameObject.GetComponent<Projectile>();
-			if (!projectile.HasAlreadyHitObject(enemy)) DealDamageRetaliation(enemy);
-			return false;
+			return projectile.HasAlreadyHitPlayerObject(character);
+        }
+		protected virtual bool OnSecondaryBulletOverlapsEnemy(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first)
+        {
+            return EnemyBulletOverlap(second, first, SecondaryPPower());
+        }
+
+        protected virtual bool OnSecondaryBulletOverlapsEnemyCurse(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first)
+		{
+            return EnemyBulletOverlap(second, first, SecondaryCursePPower());
+        }
+		protected virtual bool OnBulletOverlapsEnemyRetaliation(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first)
+        {
+            var enemy = first.gameObject.GetComponent<EnemyController>();
+            if (enemy.IsDead) return false;
+
+            var projectile = second.gameObject.GetComponent<Projectile>();
+            if (!projectile.HasAlreadyHitObject(enemy)) DealDamageRetaliation(enemy);
+            return false;
+        }
+
+        protected virtual bool OnBulletOverlapsDestructible(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first)
+		{
+            var destruct = first.gameObject.GetComponent<Destructible>();
+
+            var projectile = second.gameObject.GetComponent<Projectile>();
+            if (!projectile.HasAlreadyHitObject(destruct)) 
+				destruct.GetDamaged(PPower(), HitVfxType.None, 0.0f, _currentWeaponData.bulletType, true);
+            return false;
+        }
+		protected virtual bool OnBulletOverlapsWall(CallbackContext context, ArcadeColliderType bullet, ArcadeColliderType tile)
+		{
+			var wall = tile as PhaserTile;
+			if (wall == null) return false;
+
+            var projectile = bullet.gameObject.GetComponent<Projectile>();
+			projectile.OnHasHitWallPhaser(wall);
+            return false;
+        }
+		public override void InternalUpdate()
+		{
+			StatsLifetime += Time.deltaTime;
+
+			foreach (var projectile in _spawnedProjectiles)
+			{
+				projectile.InternalUpdate();
+			}
 		}
-		protected virtual bool OnBulletOverlapsDestructible(CallbackContext context, ArcadeColliderType second, ArcadeColliderType first) => default; // 0x00000001870CC980-0x00000001870CCAE0
-		protected virtual bool OnBulletOverlapsWall(CallbackContext context, ArcadeColliderType bullet, ArcadeColliderType tile) => default; // 0x00000001870CCAE0-0x00000001870CCBD0
-		public override void InternalUpdate() {} // 0x00000001870CCBD0-0x00000001870CCCF0
-		public virtual int ActiveProjectileCount() => default; // 0x00000001870CCCF0-0x00000001870CCD10
-		public void AddSpawnedProjectile(Projectile projectile) {} // 0x00000001870CCD10-0x00000001870CCD90
-		public void DespawnProjectile(Projectile projectile) {} // 0x00000001870CCD90-0x00000001870CCE20
-		public override void Cleanup() {} // 0x00000001870CCE20-0x00000001870CCEB0
-		public Vector2 GetPlayerCurrentDirection() => default; // 0x00000001870CCEB0-0x00000001870CCEE0
+		public virtual int ActiveProjectileCount() => _projectilePool?.countActive() ?? 0;
+		public void AddSpawnedProjectile(Projectile projectile)
+		{
+			if (!_spawnedProjectiles.Contains(projectile)) _spawnedProjectiles.Add(projectile);
+		}
+		public void DespawnProjectile(Projectile projectile)
+		{
+            if (!_spawnedProjectiles.Contains(projectile)) _spawnedProjectiles.Remove(projectile);
+        }
+		public override void Cleanup()
+		{
+			_firingAnimEvent.Cancel();
+			_firingTimer.Cancel();
+			_lastShotTimer.Cancel();
+			_projectilePool.Cleanup();
+			_secondaryPool.Cleanup();
+			this.gameObject.SetActive(false);
+		}
+		public Vector2 GetPlayerCurrentDirection() => Owner.LastMovementDirection;
 		public virtual bool LevelUp() => default; // 0x0000000184C0C910-0x0000000184C0C930
-		public void EnableAdept() {} // 0x00000001870CCEE0-0x00000001870CCF20
-		public override bool LevelUp(bool skipFire) => default; // 0x00000001870CCF20-0x00000001870CD490
+		public void EnableAdept()
+		{
+			IsAdept = true;
+			_currentWeaponData.interval *= 0.5f;
+		}
+		public override bool LevelUp(bool skipFire)
+		{
+			if (GetDataForLevel(Type, Level, out JObject newLevelData, true))
+			{
+
+			};
+		}
 		public virtual void HandlePlayerTeleport(float2 destinationPos) {} // 0x0000000180B15170-0x0000000180B15180
 		public virtual float PArea() => default; // 0x00000001870CD490-0x00000001870CD4E0
 		public virtual int PBounces() => default; // 0x00000001870CD4E0-0x00000001870CD4F0
@@ -273,5 +351,18 @@ namespace VampireSurvivorsDecompProject.Objects.Weapons
 		public void ReloadCurrentData() {} // 0x00000001870D0790-0x00000001870D0960
 		protected override Dictionary<WeaponType, JArray> GetDataDictionary() => _dataManager.AllWeaponData;
 		private void ApplyLimitBreakStatsToWeaponStats(LimitBreakData limitBreakData) {} // 0x00000001870D0960-0x00000001870D0980
-	}
+        private bool EnemyBulletOverlap(ArcadeColliderType second, ArcadeColliderType first, float damage)
+        {
+            var enemy = first.gameObject.GetComponent<EnemyController>();
+            if (enemy.IsDead) return false;
+
+            var projectile = second.gameObject.GetComponent<Projectile>();
+            if (!projectile.HasAlreadyHitObject(enemy))
+			{
+                enemy.GetDamaged(damage, VfxType, Knockback, Type, true);
+                StatsInflictedDamage += damage;
+            }
+            return false;
+        }
+    }
 }
